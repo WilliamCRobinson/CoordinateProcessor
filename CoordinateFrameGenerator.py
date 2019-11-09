@@ -142,3 +142,6 @@ def array_processor():
                 file_appender("yCoords", current_line_array, i)
                 i += 3
         current_line += 1
+
+
+array_processor()
