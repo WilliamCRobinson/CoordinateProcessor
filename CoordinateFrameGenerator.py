@@ -25,22 +25,6 @@ Here's how I want the program to proceed.
 4.Process the coordinates in this array. And append them to the appropriate files.
 """
 
-
-def line_counter(file_to_count):
-    global num_lines
-    try:
-        # hopefully the way it is called below should ensure this works.
-        count_this = open(file_to_count, "r")
-        array_of_lines = count_this.readlines()
-        num_lines = array_of_lines.length()
-        print("Lines Counted!")
-        return num_lines
-    except IOError:
-        print("could not count the lines in the specified file")
-    except:
-        print("Something went wrong with line_counter")
-
-
 # This function will create files for us that we can access and append to later.
 
 
@@ -48,21 +32,11 @@ def file_maker(name_of_file):
     try:
         file_made = open(name_of_file, "x")
         file_made.close()
-        print(name_of_file + "file created and closed")
+        print(name_of_file + "file created and closed" + "\n")
     except IOError:
         print("file already exist")
     except:
         print("Something else went wrong with file_maker")
-
-
-# A function to process an element of an array of strings
-# into an array delimited by two white spaces. So it should
-# process a string into an array.
-
-
-def string_processor(string_to_proc):
-    string_array = string_to_proc.strip("  ")
-    return string_array
 
 
 # This function should take in a filename, a lineArray and an index of the line array to append.
@@ -73,81 +47,80 @@ def file_appender(file_name, line_array, index_of_line_array):
         file_to_append = open(file_name, "a")
         file_to_append.write(line_array[index_of_line_array] + "\n")
         file_to_append.close()
-        print("string added to " + file_name)
+        # What string is added to what file
+        print("string " + line_array[index_of_line_array] + " added to " + file_name)
     except IOError:
         print("Could not append string to file")
-        quit()
     except:
         print("something went wrong with file_appender.")
 
 
 def array_processor():
-    # Open the file we are processing
-    user_input_file = input("Enter a coordinate file to process.")
-    try:
-        coord_to_proc = open(user_input_file, "r")
-        # Get a count of the lines in coord_to_proc
-        line_count = line_counter(coord_to_proc)
-    except:
-        print("the file does not exist")
-        return
-
-    # process into an array of lines
-
+    # Take input
+    # user_input_file = input("Enter a coordinate file to process: ")
+    # For now just assume the input is always modified_out.crd
+    user_input_file = "modified_out.crd"
+    # open file from input in read mode
+    coord_to_proc = open(user_input_file, "r")
+    # read lines into an array
     array_of_lines = coord_to_proc.readlines()
-
-    # print the count
-    print(line_counter(coord_to_proc))
+    # take the length of the array to get a line count
+    line_count = len(array_of_lines)
+    # Confirm this
+    print("file opened and lines counted, we have " + str(line_count) + " lines\n")
 
     # Create the files we will append data to
     file_maker("xCoords")
     file_maker("yCoords")
     file_maker("zCoords")
 
-    # declare a counter
-    current_line = 0
+    # declare a counter, start at 1 because of header info
+    current_line = 1
 
     while current_line < line_count:
-        # Process this element of array_of_lines a string to an array
-        current_line_array = string_processor(array_of_lines[current_line])
+        print("\nprocessing line " + str(current_line))
+        # Process this current_line element (string) of array_of_lines a string to an array
+        # First remove the newline character at the end
+        array_of_lines[current_line] = array_of_lines[current_line].strip('\n')
+        # then split it by two white spaces into an array
+        current_line_array = array_of_lines[current_line].split("  ")
+        # because of formatting, position zero is a "" lets take care of that
+        current_line_array.pop(0)
+        # Check that it looks normal
+        print("\nHere is the Current Line Array : " + "\n" + str(current_line_array))
 
         # This case makes the end of a frame, so we should also append a new line
-        if current_line % 39 == 0 and current_line != 0:
+        if (current_line % 39 == 0 and current_line != 0) or (current_line == line_count - 1):
+            print("Entering Edge Case")
             file_appender("zCoords", current_line_array, 0)
             file_appender("xCoords", current_line_array, 1)
             file_appender("yCoords", current_line_array, 2)
             file_appender("zCoords", current_line_array, 3)
-        if current_line % 3 == 0:
-            for i in range(0, 10):
-                file_appender("xCoords", current_line_array, i)
-                i += 3
-            for i in range(1, 8):
-                file_appender("yCoords", current_line_array, i)
-                i += 3
-            for i in range(2, 9):
-                file_appender("zCoords", current_line_array, i)
-                i += 3
         if current_line % 3 == 1:
-            for i in range(0, 10):
-                file_appender("yCoords", current_line_array, i)
-                i += 3
-            for i in range(1, 8):
-                file_appender("zCoords", current_line_array, i)
-                i += 3
-            for i in range(2, 9):
+            print("Entering Case 1")
+            for i in (0, 3, 6, 9):
                 file_appender("xCoords", current_line_array, i)
-                i += 3
+            for i in (1, 4, 7):
+                file_appender("yCoords", current_line_array, i)
+            for i in (2, 5, 8):
+                file_appender("zCoords", current_line_array, i)
         if current_line % 3 == 2:
-            for i in range(0, 10):
-                file_appender("zCoords", current_line_array, i)
-                i += 3
-            for i in range(1, 8):
-                file_appender("xCoords", current_line_array, i)
-                i += 3
-            for i in range(2, 9):
+            print("Entering Case 2")
+            for i in (0, 3, 6, 9):
                 file_appender("yCoords", current_line_array, i)
-                i += 3
+            for i in (1, 4, 7):
+                file_appender("zCoords", current_line_array, i)
+            for i in (2, 5, 8):
+                file_appender("xCoords", current_line_array, i)
+        if current_line % 3 == 0:
+            print("Entering Case 3")
+            for i in (0, 3, 6, 9):
+                file_appender("zCoords", current_line_array, i)
+            for i in (1, 4, 7):
+                file_appender("xCoords", current_line_array, i)
+            for i in (2, 5, 8):
+                file_appender("yCoords", current_line_array, i)
         current_line += 1
-
+    print("Done processing your file")
 
 array_processor()
