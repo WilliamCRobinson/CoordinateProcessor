@@ -2,30 +2,12 @@
 Author: William Robinson November 2019
 The purpose of this module is to define functions and variables that can pull either the x, the y or the z, coordinates
 in sets of frames from MDCRD files.
-
-Goal: we start with a MDCRD file stripped of everything but the phosphorous atoms. We want to end with three files.
-        A file with x coordinates with each frame set delimited by a blank line. This is outputting to a new file.
-        A file with y coordinates with each frame set delimited by a blank line. This is outputting to a new file.
-        A file with z coordinates with each frame set delimited by a blank line. This is outputting to a new file.
-
-        Our data structure is something like this
-                Ten columns and 38 lines.
-                x  y  z  x  y  z  x  y  z  x
-                y  z  x  y  z  x  y  z  x  y
-                z  x  y  z  x  y  z  x  y  z
-                ...
-                z  x  y  z
-Here's how I want the program to proceed.
-1. Take user input from the console, such as the file to be called. This will make it easy to use in a bash script.
-
-2. Open this file and call it coordToProc, now we have an object with a class that we can manipulate.
-
-3. Read a line from this file and sort it into an array delimited by at least 2 whitespaces. Here linenumber = 0.
-
-4.Process the coordinates in this array. And append them to the appropriate files.
 """
 
-# This function will create files for us that we can access and append to later.
+# I like to think I've been clear but if anything is confusing don't hesitate to reach out to me. :)
+
+
+# This helper function will create files for us that we can access and append to later.
 
 
 def file_maker(name_of_file):
@@ -39,7 +21,7 @@ def file_maker(name_of_file):
         print("Something else went wrong with file_maker")
 
 
-# This function should take in a filename, a lineArray and an index of the line array to append.
+# This helper function should take in a filename, a lineArray and an index of the line array to append.
 
 
 def file_appender(file_name, line_array, index_of_line_array):
@@ -54,11 +36,11 @@ def file_appender(file_name, line_array, index_of_line_array):
     except:
         print("something went wrong with file_appender.")
 
+# This function is the beef of this module. See Attached readme.txt and comments for details on how this works.
+
 
 def array_processor():
-    # Take input
-    # user_input_file = input("Enter a coordinate file to process: ")
-    # For now just assume the input is always modified_out.crd
+    # For now just assume the input is always modified_out.crd we can easily change this later on to be cmdline input
     user_input_file = "modified_out.crd"
     # open file from input in read mode
     coord_to_proc = open(user_input_file, "r")
@@ -66,15 +48,15 @@ def array_processor():
     array_of_lines = coord_to_proc.readlines()
     # take the length of the array to get a line count
     line_count = len(array_of_lines)
-    # Confirm this
+    # Confirm this to the user
     print("file opened and lines counted, we have " + str(line_count) + " lines\n")
 
-    # Create the files we will append data to
+    # Create the files we will append data to with our helper function.
     file_maker("xCoords")
     file_maker("yCoords")
     file_maker("zCoords")
 
-    # declare a counter, start at 1 because of header info
+    # declare a counter, start at 1 because of CPPtraj header info
     current_line = 1
 
     while current_line < line_count:
@@ -89,14 +71,24 @@ def array_processor():
         # Check that it looks normal
         print("\nHere is the Current Line Array : " + "\n" + str(current_line_array))
 
-        # This case makes the end of a frame, so we should also append a new line
-        if (current_line % 39 == 0 and current_line != 0) or (current_line == line_count - 1):
+        # This case makes the end of a frame, so we should also append a new line to each of our coord files
+        if len(current_line_array) == 4:
             print("Entering Edge Case")
             file_appender("zCoords", current_line_array, 0)
             file_appender("xCoords", current_line_array, 1)
+            x_file = open("xCoords", "a")
+            x_file.write("\n")
+            x_file.close()
             file_appender("yCoords", current_line_array, 2)
+            y_file = open("yCoords", "a")
+            y_file.write("\n")
+            y_file.close()
             file_appender("zCoords", current_line_array, 3)
-        if current_line % 3 == 1:
+            z_file = open("zCoords", "a")
+            z_file.write("\n")
+            z_file.close()
+        # This is the first line case
+        elif current_line % 3 == 1:
             print("Entering Case 1")
             for i in (0, 3, 6, 9):
                 file_appender("xCoords", current_line_array, i)
@@ -104,7 +96,7 @@ def array_processor():
                 file_appender("yCoords", current_line_array, i)
             for i in (2, 5, 8):
                 file_appender("zCoords", current_line_array, i)
-        if current_line % 3 == 2:
+        elif current_line % 3 == 2:
             print("Entering Case 2")
             for i in (0, 3, 6, 9):
                 file_appender("yCoords", current_line_array, i)
@@ -112,7 +104,7 @@ def array_processor():
                 file_appender("zCoords", current_line_array, i)
             for i in (2, 5, 8):
                 file_appender("xCoords", current_line_array, i)
-        if current_line % 3 == 0:
+        elif current_line % 3 == 0 and current_line != 70200:
             print("Entering Case 3")
             for i in (0, 3, 6, 9):
                 file_appender("zCoords", current_line_array, i)
@@ -123,4 +115,16 @@ def array_processor():
         current_line += 1
     print("Done processing your file")
 
-array_processor()
+
+# This function runs Our program with some side comments
+
+
+def main_function():
+    print("Running Array Processor")
+    array_processor()
+    print("Array processor successfully run!" + "\n"
+          "now go and get some sun")
+
+
+main_function()
+
