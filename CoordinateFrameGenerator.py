@@ -33,11 +33,12 @@ def line_counter(file_to_count):
         count_this = open(file_to_count, "r")
         array_of_lines = count_this.readlines()
         num_lines = array_of_lines.length()
-    except IOError:
-        print("could not count the lines in the specified file")
-    finally:
         print("Lines Counted!")
         return num_lines
+    except IOError:
+        print("could not count the lines in the specified file")
+    except:
+        print("Something went wrong with line_counter")
 
 
 # This function will create files for us that we can access and append to later.
@@ -47,10 +48,11 @@ def file_maker(name_of_file):
     try:
         file_made = open(name_of_file, "x")
         file_made.close()
+        print(name_of_file + "file created and closed")
     except IOError:
         print("file already exist")
-    finally:
-        print(name_of_file + "file created and closed")
+    except:
+        print("Something else went wrong with file_maker")
 
 
 # A function to process an element of an array of strings
@@ -71,20 +73,24 @@ def file_appender(file_name, line_array, index_of_line_array):
         file_to_append = open(file_name, "a")
         file_to_append.write(line_array[index_of_line_array] + "\n")
         file_to_append.close()
-    except IOError:
-        print("Could not string to file")
-    finally:
         print("string added to " + file_name)
+    except IOError:
+        print("Could not append string to file")
+        quit()
+    except:
+        print("something went wrong with file_appender.")
 
 
 def array_processor():
     # Open the file we are processing
     user_input_file = input("Enter a coordinate file to process.")
-    coord_to_proc = open(user_input_file, "r")
-
-    # Get a count of the lines in coord_to_proc
-
-    line_count: int = line_counter(coord_to_proc)
+    try:
+        coord_to_proc = open(user_input_file, "r")
+        # Get a count of the lines in coord_to_proc
+        line_count = line_counter(coord_to_proc)
+    except:
+        print("the file does not exist")
+        return
 
     # process into an array of lines
 
