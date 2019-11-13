@@ -3,7 +3,7 @@ Author: William Robinson November 2019
 The purpose of this module is to define functions and variables that can pull either the x, the y or the z, coordinates
 in sets of frames from MDCRD files.
 """
-#import the system module to take command line arguments
+# import the system module to take command line arguments, currently not on for testing purposes.
 import sys
 # I like to think I've been clear but if anything is confusing don't hesitate to reach out to me. :)
 
@@ -43,7 +43,8 @@ def file_appender(file_name, line_array, index_of_line_array):
 
 def array_processor():
     # Take user input as sys.argv[1] argv[0] is the module name always.
-    user_input_file = sys.argv[1]
+    # user_input_file = sys.argv[1]
+    user_input_file = "modified_out.crd"
     # open file from input in read mode
     coord_to_proc = open(user_input_file, "r")
     # read lines into an array
