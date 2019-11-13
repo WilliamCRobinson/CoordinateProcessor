@@ -18,23 +18,29 @@ Goal: we start with a MDCRD file stripped of everything but the phosphorous atom
                 ...
                 z  x  y  z
 ASSUMPTIONS
+
 	1. 1 atom per crd file with N frames and M lines per frame M*N total lines in file.
+	
 	2. Assume it is the product of a CPPtraj script
+	
 	3. We assume the data structure described above, with new line charactes and 2 white spaces between each number
+	
 	4. each number is xx.xxx or _y.yyy if it is single digit. We include the white space with it.
+	
 
 Here's how I want the program to proceed.
 
-1. Take user input from the console, such as the file to be called. This will make it easy to use in a bash script.
+	1. Take user input from the console, such as the file to be called. This will make it easy to use in a bash script.
 
-2. Open this file and call it coordToProc, now we have an object with a class that we can manipulate.
+	2. Open this file and call it coordToProc, now we have an object with a class that we can manipulate.
 
-3. Read a line from this file and sort it into an array delimited by at least 2 whitespaces. Here linenumber = 0.
+	3. Read a line from this file and sort it into an array delimited by at least 2 whitespaces. Here linenumber = 0.
 
-4. Process the coordinates in this array. And append them to the appropriate files.
+	4. Process the coordinates in this array. And append them to the appropriate files.
 
 
 Global Variables:
+
 	num_lines - the number of lines in the file read in by the user. 
 
 Functions
