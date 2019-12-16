@@ -2,6 +2,9 @@
 Author: William Robinson November 2019
 The purpose of this module is to define functions and variables that can pull either the x, the y or the z, coordinates
 in sets of frames from MDCRD files.
+
+As of December this file no longer has any use in the project as it is bugged, coordinate_sorting.py shall take its
+place and it will be phased out of the main package. It is included here for reference and historical purposes.
 """
 # import the system module to take command line arguments, currently not on for testing purposes.
 import sys

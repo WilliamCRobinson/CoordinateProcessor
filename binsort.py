@@ -8,7 +8,6 @@ def collectCoords(frameCount, coordsFile):
     coordsArray = []
     while currentFrame <= frameCount:
         for coord in coordsFile:
-            # wcr:Have to change this to "\n" for my data structure.
             if coord == "\n":
                 currentFrame += 1
                 coordsFile.next()
@@ -72,9 +71,6 @@ def generateOutputFile(binsize, shift, densityArray, outputFile):
     for index in densityArray.len():
         actualBinVal = index * binsize - shift
         outputFile.write(actualBinVal + "       " + densityArray[index] + "\n")
-
-
-# wcr: Changed it to read in the xCoords file instead of xcoords, just cause thats what I had in my directory
 
 
 def main():

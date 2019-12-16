@@ -1,8 +1,8 @@
 xcoords = open("xcoords", "w+")
 ycoords = open("ycoords", "w+")
 zcoords = open("zcoords", "w+")
-with open("P31traj.crd", "r") as f:
-    f.next()
+with open("modified_out.crd", "r") as f:
+    f.__next__()
     num = 0
     xiter = 0
     yiter = 0

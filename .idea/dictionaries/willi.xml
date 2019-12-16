@@ -2,8 +2,13 @@
   <dictionary name="willi">
     <words>
       <w>binsize</w>
+      <w>coords</w>
       <w>histogramming</w>
+      <w>lovenia</w>
       <w>pyplot</w>
+      <w>xcoords</w>
+      <w>ycoords</w>
+      <w>zcoords</w>
     </words>
   </dictionary>
 </component>
