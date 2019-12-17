@@ -18,12 +18,11 @@ def coordinate_file_checker(coord):
             print(list_of_coordinates[i])
         i = i + 1
 
-def cfc_run:
-    print("Bad Lines for X coordinates")
-    coordinate_file_checker("xCoords")
-    print("Bad Lines for Y coordinates")
-    coordinate_file_checker("yCoords")
-    print("Bad Lines for Z coordinates")
-    coordinate_file_checker("zCoords")
 
-cfc_run()
+def cfc_run():
+    print("Bad Lines for X coordinates")
+    coordinate_file_checker("xcoords")
+    print("Bad Lines for Y coordinates")
+    coordinate_file_checker("ycoords")
+    print("Bad Lines for Z coordinates")
+    coordinate_file_checker("zcoords")
