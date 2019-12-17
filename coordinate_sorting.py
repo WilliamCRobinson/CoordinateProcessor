@@ -1,44 +1,33 @@
 """
 Author: William Robinson December 2019
-
 The purpose of this python module is to the sort the coordinates from an MDCRD output file.
 This attempt builds on the successes of CoordinateFrameGenerator Module, which was a minor failur.
-
 I also am going to adopt the data conventions that Lovenia is using for consistency.
 """
-# This OS module will come in handy for moving around in directories later on in this project.
 import os
-
-# check if files exist, if they do we will remove them so we don't mess up old data
+import sys
+# Filename will be equal to the first argument
+filename = sys.argv[0]
 if os.path.exists("xcoords") or os.path.exists("ycoords") or os.path.exists("zcoords"):
     os.remove("xcoords")
     os.remove("ycoords")
     os.remove("zcoords")
-# Okay now make new files to sort coordinates into
 xcoords = open("xcoords", "w+")
 ycoords = open("ycoords", "w+")
 zcoords = open("zcoords", "w+")
-
-# Declare some counter variable to assist in keeping track of the iteration.
 line_num = 1
 x_counter = 0
 y_counter = 0
 z_counter = 0
-
-file = open("modified_out.crd", "r")
+file = open(filename, "r")
 #Skip the header So the pointer is on the first line of data.
 file.__next__()
-# From here we want to loop through and add in files accordingly.
-# 70202 is a hardcoded value since we expect this output from the CPPTRAJ script
 for line in file:
-    # Get a string of the current line and cast it to list.
     current_line_string = line
     current_line_string = current_line_string.replace('\n', '')
     current_line_list = current_line_string.split(' ')
-    # Now remove the things that are just ' ' or '' if they exist, so use try catch
     while '' in current_line_list:
         current_line_list.remove('')
-
     if line_num % 3 == 1:
         # handle first case
         current_list_counter = 0
@@ -118,7 +107,6 @@ for line in file:
                     ycoords.write("END OF FRAME\n")
             current_list_counter = current_list_counter + 1
     line_num = line_num + 1
-
 xcoords.close()
 ycoords.close()
 zcoords.close()
