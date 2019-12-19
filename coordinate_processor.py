@@ -1,7 +1,7 @@
 """
 Author William Robinson December 2019
 
-The purpose of this file is to synthesize the results of the CppTraj script, coordinate_sorting.py, csv_generator.py,
+The purpose of this module is to synthesize the results of the CppTraj script, coordinate_sorting.py, csv_generator.py,
 and histogram_generator.py. It should also allow for the user to run the suite of programs easily.
 
 I also figured it would be faster to have all the imports in one place since some modules had some in common
@@ -145,6 +145,7 @@ def cfc_run():
     print("Bad Lines for Z coordinates")
     coordinate_file_checker("zcoords")
 
+
 '''
 The purpose of the next three functions is to process the results of coordinate_sorting into CSV files of binned frames 
 (time) this takes a bit longer to run on our data sets. 5 seconds.
@@ -181,7 +182,7 @@ def csv_gen(file, frame_binsize, dir_string):
                 directory_to_inject = os.getcwd()
                 os.chdir(cwd)
                 df.to_csv(directory_to_inject + "/" + file + "_framebin_" +
-                str(current_frame_bin) + ".csv", index=False)
+                          str(current_frame_bin) + ".csv", index=False)
                 frame_count = 0
                 # Empty out the list
                 list_to_csv = []
@@ -207,10 +208,14 @@ def run_generator(filex, dir_stringx, filey, dir_stringy, filez, dir_stringz, fr
 
 def csv_to_hist(csv_file, num_bins):
     data_frame = pd.read_csv(csv_file)
+    data_frame.hist(bins=num_bins)
     plt.title(csv_file[:-4])
+    plt.xlim(-20, 80)
+    plt.ylim(0, 75)
     plt.xlabel(csv_file[0] + " coordinate")
     plt.ylabel("Frequency")
-    plt.savefig(csv_file[:-4])
+    plt.savefig(csv_file[:-4] + ".png")
+    plt.close()
 
 
 def main():
@@ -219,22 +224,26 @@ def main():
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"
-    frame_interval_size = 100
-    coordinate_bins = 50
-
+    frame_interval_size = int(input("Please, Enter frame interval size: "))
+    coordinate_bins = int(input("Please, Enter number of coordinate bins: "))
+    print("Lets get that started!")
     # These are standard
     dir_stringx = "CSV" + "_" + xfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
     dir_stringy = "CSV" + "_" + yfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
     dir_stringz = "CSV" + "_" + zfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
-
+    print("sorting coordinates from crd file")
     # Sample Command "Python coordinate_processor.py modified_out.crd xcoords ycoords zcoords 20 100"
     # Run Coordinate sorting based on the first argument
     coordinate_sorting(mdcrdfilename, xfile, yfile, zfile)
+    print("coordinates sorted")
     # This will output files called xfile, yfile, zfile
     # Now run CSV generator on those files.
+    print("generating CSV files")
     run_generator(xfile, dir_stringx, yfile, dir_stringy, zfile, dir_stringz, frame_interval_size)
+    print("csv files generated")
     # We should now have three directories CSV_ifile_frameintervalsize_N
     # Enter this directory for xfile
+    print("making histograms")
     for csvfile in os.listdir(dir_stringx):
         os.chdir(dir_stringx)
         csv_to_hist(csvfile, coordinate_bins)
@@ -247,6 +256,8 @@ def main():
         os.chdir(dir_stringz)
         csv_to_hist(csvfile, coordinate_bins)
         os.chdir(cwd)
+    print("histograms made")
+    print("Done!")
 
 
 main()
