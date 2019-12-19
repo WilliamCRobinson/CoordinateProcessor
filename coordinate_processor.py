@@ -125,6 +125,26 @@ def coordinate_sorting(filename, xout, yout, zout):
     zcoords.close()
 
 
+def coordinate_file_checker(coord):
+    coordinates = open(coord, "r")
+    # read through the lines and check for ones that have too many numbers.
+    list_of_coordinates = coordinates.readlines()
+    i = 0
+    while i < list_of_coordinates.__len__():
+        if list_of_coordinates[i].__len__() >= 9:
+            print("Found Bad Line on line " + str(i) + ": ")
+            print(list_of_coordinates[i])
+        i = i + 1
+
+
+def cfc_run():
+    print("Bad Lines for X coordinates")
+    coordinate_file_checker("xcoords")
+    print("Bad Lines for Y coordinates")
+    coordinate_file_checker("ycoords")
+    print("Bad Lines for Z coordinates")
+    coordinate_file_checker("zcoords")
+
 '''
 The purpose of the next three functions is to process the results of coordinate_sorting into CSV files of binned frames 
 (time) this takes a bit longer to run on our data sets. 5 seconds.
@@ -161,7 +181,7 @@ def csv_gen(file, frame_binsize, dir_string):
                 directory_to_inject = os.getcwd()
                 os.chdir(cwd)
                 df.to_csv(directory_to_inject + "/" + file + "_framebin_" +
-                          str(current_frame_bin) + ".csv", index=False)
+                str(current_frame_bin) + ".csv", index=False)
                 frame_count = 0
                 # Empty out the list
                 list_to_csv = []
