@@ -5,13 +5,18 @@ The purpose of this module is to synthesize the results of the CppTraj script, c
 and histogram_generator.py. It should also allow for the user to run the suite of programs easily.
 
 I also figured it would be faster to have all the imports in one place since some modules had some in common
+
+This needs to run on python 3. python 2 will give you issues on linux.
 """
 
 import os
 import sys
 import shutil
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 
 '''
 The purpose of this function is to the sort the coordinates from an MDCRD output file.
@@ -224,8 +229,8 @@ def main():
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"
-    frame_interval_size = int(input("Please, Enter frame interval size: "))
-    coordinate_bins = int(input("Please, Enter number of coordinate bins: "))
+    frame_interval_size = 5
+    coordinate_bins = 100
     print("Lets get that started!")
     # These are standard
     dir_stringx = "CSV" + "_" + xfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
