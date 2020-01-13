@@ -66,3 +66,4 @@ Notes on Parsing the Strucure
 			y in 2
 			z in 3
 	then the frame ends. 
+As of December 2019, we have thus far been able to bin the data over intervals of frames in the simulations. Now it remains to generate 2D histograms from this data so that we can see the evolution of each axes histogram over time in the simulation, allowing us to determine when the cell membrane has formed. 
