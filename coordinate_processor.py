@@ -211,6 +211,7 @@ def run_generator(filex, dir_stringx, filey, dir_stringy, filez, dir_stringz, fr
 
 # This function will go through a CSV file prepared by the CSV generator and process it into a histogram
 
+
 def csv_to_hist(csv_file, num_bins):
     data_frame = pd.read_csv(csv_file)
     data_frame.hist(bins=num_bins)
@@ -222,6 +223,18 @@ def csv_to_hist(csv_file, num_bins):
     plt.savefig(csv_file[:-4] + ".png")
     plt.close()
 
+# This function takes in two CSV files and produces a 2d Hexbinned histogram
+
+def heat_mapper(axiscsv1, axiscsv2):
+    title = axiscsv1[0] + " vs. " + axiscsv2[0] + " for " + axiscsv1[8:18]
+    df1 = pd.read_csv(axiscsv1)
+    df2 = pd.read_csv(axiscsv2)
+    plt.hexbin(x=df1, y=df2, gridsize=50, cmap="magma")
+    plt.title(title)
+    plt.savefig(title + ".png")
+    plt.show()
+    plt.close()
+
 
 def main():
     cwd = os.getcwd()
@@ -229,26 +242,27 @@ def main():
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"
-    frame_interval_size = 5
+    frame_interval_size = 100
     coordinate_bins = 100
     print("Lets get that started!")
     # These are standard
     dir_stringx = "CSV" + "_" + xfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
     dir_stringy = "CSV" + "_" + yfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
     dir_stringz = "CSV" + "_" + zfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
-    print("sorting coordinates from crd file")
+    print("Sorting coordinates from crd file")
     # Sample Command "Python coordinate_processor.py modified_out.crd xcoords ycoords zcoords 20 100"
     # Run Coordinate sorting based on the first argument
     coordinate_sorting(mdcrdfilename, xfile, yfile, zfile)
-    print("coordinates sorted")
+    print("Coordinates sorted")
     # This will output files called xfile, yfile, zfile
     # Now run CSV generator on those files.
     print("generating CSV files")
     run_generator(xfile, dir_stringx, yfile, dir_stringy, zfile, dir_stringz, frame_interval_size)
-    print("csv files generated")
+    print("CSV files generated")
     # We should now have three directories CSV_ifile_frameintervalsize_N
     # Enter this directory for xfile
-    print("making histograms")
+    # TODO change this so that it takes first, middle and last.
+    print("Making histograms")
     for csvfile in os.listdir(dir_stringx):
         os.chdir(dir_stringx)
         csv_to_hist(csvfile, coordinate_bins)
@@ -261,7 +275,7 @@ def main():
         os.chdir(dir_stringz)
         csv_to_hist(csvfile, coordinate_bins)
         os.chdir(cwd)
-    print("histograms made")
+    print("Histograms made")
     print("Done!")
 
 
