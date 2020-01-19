@@ -188,7 +188,7 @@ def csv_gen(file, frame_binsize, dir_string):
                 directory_to_inject = os.getcwd()
                 os.chdir(cwd)
                 df.to_csv(directory_to_inject + "/" + file + "_framebin_" +
-                          str(current_frame_bin) + ".csv", index=False)
+                          str(current_frame_bin) + "_.csv", index=False)
                 frame_count = 0
                 # Empty out the list
                 list_to_csv = []
@@ -266,8 +266,7 @@ def create_bin_edges(low, high, width):
 
 def create_binned_csv_counts(maindirectorystring, bin_edges, valuecountstring):
     for filename in os.listdir(maindirectorystring):
-        binnumber = filename[16:19]
-        binnumber = binnumber.strip('.').strip('_')
+        binnumber = filename.split("_")[2]
         vcfilestring = str(filename[0:17]) + binnumber + "_value_counts.csv"
         os.chdir(maindirectorystring)
         os.chmod(filename, 0o7777)
@@ -289,7 +288,7 @@ def change_permission(path, mode):
 
 
 # Combines CSV files of the same index into a main CSV file.
-def combine_to_master(coordmastername, csvdir):
+def combine_to_master(coordmastername, csvdir, frameintsize):
     os.chdir(csvdir)
     ext = "csv"
 
@@ -302,16 +301,34 @@ def combine_to_master(coordmastername, csvdir):
     combined_csv = pd.read_csv(sorted_filenames[0])
     for csv_to_merge in sorted_filenames:
         combined_csv = pd.merge(combined_csv, pd.read_csv(csv_to_merge))
-    combined_csv.to_csv(coordmastername + ".csv", index=False, encoding="utf-8")
+    combined_csv.to_csv(coordmastername + "_" + frameintsize + "_" + ".csv", index=False, encoding="utf-8")
 
 
-def master_heatmap(master_csv_file):
+def master_heatmap(master_csv_file, xlabels, ylabels):
     data_frame = pd.read_csv(master_csv_file)
-    transposed_index_df = data_frame.set_index("Coordinate Bins").T
-    fig, ax = plt.subplots()
-    sns.heatmap(transposed_index_df)
-    fig.savefig(master_csv_file[:-4] + '.png')
+    index_df = data_frame.set_index("Coordinate Bins")
 
+    sns.set_style("ticks")
+    sns.set(font_scale=7.5)
+
+    fig, ax = plt.subplots(figsize=(90, 125))
+
+    sns.heatmap(index_df, xticklabels=xlabels, yticklabels=ylabels)
+
+    plt.xlabel("Time Bins")
+    plt.ylabel("Coordinate Bins")
+
+    fig.savefig(master_csv_file[:-4] + '.png')
+    plt.close(fig)
+
+
+def frame_counter(mdcrd):
+    count = 0
+    with open(mdcrd, "r") as f:
+        for line in f:
+            if line == "\n":
+                count += 1
+    return count
 
 
 def main():
@@ -319,52 +336,62 @@ def main():
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"
-    frame_interval_size = 20
-    print("Lets get that started!")
+    frame_interval_size = 50
     # These are standard
     dir_stringx = "CSV" + "_" + xfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
     dir_stringy = "CSV" + "_" + yfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
     dir_stringz = "CSV" + "_" + zfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
-    print("Sorting coordinates from crd file")
     # Sample Command "Python coordinate_processor.py modified_out.crd xcoords ycoords zcoords 20 100"
     # Run Coordinate sorting based on the first argument
     coordinate_sorting(mdcrdfilename, xfile, yfile, zfile)
-    print("Coordinates sorted")
     # This will output files called xfile, yfile, zfile
+    # Now we can get a frame count.
+    frame_count = frame_counter(xfile)
+    print("Frame count " + str(frame_count))
     # Now run CSV generator on those files.
-    print("generating CSV files")
     run_generator(xfile, dir_stringx, yfile, dir_stringy, zfile, dir_stringz, frame_interval_size)
     xvcdir = "value_counts_x_frameintervalsize_" + str(frame_interval_size)
     yvcdir = "value_counts_y_frameintervalsize_" + str(frame_interval_size)
     zvcdir = "value_counts_z_frameintervalsize_" + str(frame_interval_size)
     cwd = os.getcwd()
-    data_bin_edges = create_bin_edges(-20, 100, 1)
+    # This will serve to help create counts and as the y label ticks
+    data_bin_edges = create_bin_edges(-20, 80, 1)
+    # This will serve as the x label ticks
+    time_bin_edges = create_bin_edges(0, frame_count, frame_interval_size)
+    directory_cleaner(xvcdir)
     create_vc_directory(os.getcwd(), xvcdir)
     create_binned_csv_counts(dir_stringx, data_bin_edges, "value_counts_x_frameintervalsize_"
                              + str(frame_interval_size))
+    directory_cleaner(yvcdir)
     create_vc_directory(os.getcwd(), yvcdir)
     create_binned_csv_counts(dir_stringy, data_bin_edges, "value_counts_y_frameintervalsize_"
                              + str(frame_interval_size))
+    directory_cleaner(zvcdir)
     create_vc_directory(os.getcwd(), zvcdir)
     create_binned_csv_counts(dir_stringz, data_bin_edges, "value_counts_z_frameintervalsize_"
                              + str(frame_interval_size))
+
     os.chdir(cwd)
-    combine_to_master("xmaster", xvcdir)
+    combine_to_master("xmaster", xvcdir, str(frame_interval_size))
     os.chdir(cwd)
-    combine_to_master("ymaster", yvcdir)
+    combine_to_master("ymaster", yvcdir, str(frame_interval_size))
     os.chdir(cwd)
-    combine_to_master("zmaster", zvcdir)
+    combine_to_master("zmaster", zvcdir, str(frame_interval_size))
     os.chdir(cwd)
-    print("CSV files generated")
+
     os.chdir(xvcdir)
-    master_heatmap("xmaster.csv")
+    master_heatmap("xmaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
     os.chdir("../")
+
     os.chdir(yvcdir)
-    master_heatmap("ymaster.csv")
+    master_heatmap("ymaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
     os.chdir("../")
+
     os.chdir(zvcdir)
-    master_heatmap("zmaster.csv")
+    master_heatmap("zmaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
     os.chdir("../")
+
+
 
 
 main()
