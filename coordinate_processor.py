@@ -10,8 +10,8 @@ This needs to run on python 3. python 2 will give you issues on linux.
 """
 
 import os
-import sys
 import shutil
+import glob
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
@@ -181,7 +181,7 @@ def csv_gen(file, frame_binsize, dir_string):
             frame_count += 1
             if frame_count == frame_binsize:
                 # load the current list into a CSV! then reset frame count and inrement the current frame bin.
-                df = pd.DataFrame(list_to_csv, columns=["Coordinates for bin " + str(current_frame_bin)])
+                df = pd.DataFrame(list_to_csv, columns=["Time bin " + str(current_frame_bin)])
                 cwd = os.getcwd()
                 os.chdir(dir_string)
                 directory_to_inject = os.getcwd()
@@ -223,8 +223,8 @@ def csv_to_hist(csv_file, num_bins):
     plt.savefig(csv_file[:-4] + ".png")
     plt.close()
 
-# This function takes in two CSV files and produces a 2d Hexbinned histogram
 
+# This function takes in two CSV files and produces a 2d Hexbinned histogram
 def heat_mapper(axiscsv1, axiscsv2):
     title = axiscsv1[0] + " vs. " + axiscsv2[0] + " for " + axiscsv1[8:18]
     df1 = pd.read_csv(axiscsv1)
@@ -236,14 +236,80 @@ def heat_mapper(axiscsv1, axiscsv2):
     plt.close()
 
 
+'''
+These four methods are intended to assist in processing the data for each of the axes. 
+'''
+
+
+# Creates a directory to store the value count csv files in.
+# Handles case, where files exist, this prevents double writing
+def create_vc_directory(maindirectorystring, valuecountstring):
+    os.chdir(maindirectorystring)
+    if os.path.exists(valuecountstring):
+        shutil.rmtree(valuecountstring)
+        os.mkdir(valuecountstring)
+    else:
+        os.mkdir(valuecountstring)
+    os.chdir(maindirectorystring)
+
+
+# Defines bin edges to be fed into create_binned_csv_counts
+def create_bin_edges(low, high, width):
+    bin_edges = []
+    i = low
+    while i <= high:
+        bin_edges.append(i)
+        i += width
+    return bin_edges
+
+
+def create_binned_csv_counts(maindirectorystring, bin_edges, valuecountstring):
+    for filename in os.listdir(maindirectorystring):
+        binnumber = filename[16:19]
+        binnumber = binnumber.strip('.').strip('_')
+        vcfilestring = str(filename[0:17]) + binnumber + "_value_counts.csv"
+        os.chdir(maindirectorystring)
+        os.chmod(filename, 0o7777)
+        df = pd.read_csv(filename)
+        data_array = df["Time bin " + str(binnumber)].to_numpy()
+        os.chdir("../")
+        os.chdir(valuecountstring)
+        pd.cut(data_array, bin_edges).value_counts().to_csv(vcfilestring, index_label="Coordinate Bins",
+                                                            index=True, header=["Time bin " + str(binnumber)])
+        os.chdir("../")
+
+
+def change_permission(path, mode):
+    for root, dirs, files in os.walk(path, topdown=False):
+        for directory in [os.path.join(root, d) for d in dirs]:
+            os.chmod(directory, mode)
+    for file in [os.path.join(root, f) for f in files]:
+        os.chmod(file, mode)
+
+
+# Combines CSV files of the same index into a main CSV file.
+def combine_to_master(coordmastername, csvdir):
+    os.chdir(csvdir)
+    ext = "csv"
+
+    all_filenames = []
+    for i in glob.glob('*.{}'.format(ext)):
+        all_filenames.append(i)
+
+    sorted_filenames = sorted(all_filenames, key=lambda a: int(a.split("_")[2]))
+
+    combined_csv = pd.read_csv(sorted_filenames[0])
+    for csv_to_merge in sorted_filenames:
+        combined_csv = pd.merge(combined_csv, pd.read_csv(csv_to_merge))
+    combined_csv.to_csv(coordmastername + ".csv", index=False, encoding="utf-8")
+
+
 def main():
-    cwd = os.getcwd()
     mdcrdfilename = "modified_out.crd"
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"
     frame_interval_size = 100
-    coordinate_bins = 100
     print("Lets get that started!")
     # These are standard
     dir_stringx = "CSV" + "_" + xfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
@@ -258,25 +324,27 @@ def main():
     # Now run CSV generator on those files.
     print("generating CSV files")
     run_generator(xfile, dir_stringx, yfile, dir_stringy, zfile, dir_stringz, frame_interval_size)
+    xvcdir = "value_counts_x_frameintervalsize_" + str(frame_interval_size)
+    yvcdir = "value_counts_y_frameintervalsize_" + str(frame_interval_size)
+    zvcdir = "value_counts_z_frameintervalsize_" + str(frame_interval_size)
+    cwd = os.getcwd()
+    data_bin_edges = create_bin_edges(-20, 100, 1)
+    create_vc_directory(os.getcwd(), xvcdir)
+    create_binned_csv_counts(dir_stringx, data_bin_edges, "value_counts_x_frameintervalsize_"
+                             + str(frame_interval_size))
+    create_vc_directory(os.getcwd(), yvcdir)
+    create_binned_csv_counts(dir_stringy, data_bin_edges, "value_counts_y_frameintervalsize_"
+                             + str(frame_interval_size))
+    create_vc_directory(os.getcwd(), zvcdir)
+    create_binned_csv_counts(dir_stringz, data_bin_edges, "value_counts_z_frameintervalsize_"
+                             + str(frame_interval_size))
+    os.chdir(cwd)
+    combine_to_master("xmaster", xvcdir)
+    os.chdir(cwd)
+    combine_to_master("ymaster", yvcdir)
+    os.chdir(cwd)
+    combine_to_master("zmaster", zvcdir)
     print("CSV files generated")
-    # We should now have three directories CSV_ifile_frameintervalsize_N
-    # Enter this directory for xfile
-    # TODO change this so that it takes first, middle and last.
-    print("Making histograms")
-    for csvfile in os.listdir(dir_stringx):
-        os.chdir(dir_stringx)
-        csv_to_hist(csvfile, coordinate_bins)
-        os.chdir(cwd)
-    for csvfile in os.listdir(dir_stringy):
-        os.chdir(dir_stringy)
-        csv_to_hist(csvfile, coordinate_bins)
-        os.chdir(cwd)
-    for csvfile in os.listdir(dir_stringz):
-        os.chdir(dir_stringz)
-        csv_to_hist(csvfile, coordinate_bins)
-        os.chdir(cwd)
-    print("Histograms made")
-    print("Done!")
 
 
 main()
