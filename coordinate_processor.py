@@ -13,6 +13,7 @@ import os
 import shutil
 import glob
 import pandas as pd
+import seaborn as sns
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -304,12 +305,21 @@ def combine_to_master(coordmastername, csvdir):
     combined_csv.to_csv(coordmastername + ".csv", index=False, encoding="utf-8")
 
 
+def master_heatmap(master_csv_file):
+    data_frame = pd.read_csv(master_csv_file)
+    transposed_index_df = data_frame.set_index("Coordinate Bins").T
+    fig, ax = plt.subplots()
+    sns.heatmap(transposed_index_df)
+    fig.savefig(master_csv_file[:-4] + '.png')
+
+
+
 def main():
     mdcrdfilename = "modified_out.crd"
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"
-    frame_interval_size = 100
+    frame_interval_size = 20
     print("Lets get that started!")
     # These are standard
     dir_stringx = "CSV" + "_" + xfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
@@ -344,7 +354,17 @@ def main():
     combine_to_master("ymaster", yvcdir)
     os.chdir(cwd)
     combine_to_master("zmaster", zvcdir)
+    os.chdir(cwd)
     print("CSV files generated")
+    os.chdir(xvcdir)
+    master_heatmap("xmaster.csv")
+    os.chdir("../")
+    os.chdir(yvcdir)
+    master_heatmap("ymaster.csv")
+    os.chdir("../")
+    os.chdir(zvcdir)
+    master_heatmap("zmaster.csv")
+    os.chdir("../")
 
 
 main()
