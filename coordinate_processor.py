@@ -1,14 +1,14 @@
 """
 Author William Robinson December 2019
-
-The purpose of this module is to synthesize the results of the CppTraj script, coordinate_sorting.py, csv_generator.py,
-and histogram_generator.py. It should also allow for the user to run the suite of programs easily.
-
-I also figured it would be faster to have all the imports in one place since some modules had some in common
-
+The purpose of this module is to process the results of a cpptraj script that strips an MDCRD file of all but one
+type of atom into a 2d histograms of where those atoms are in each axis over time. This should allow us to determine at
+which frame of a simulation a certain condition has been met. In our case we are looking at cell membrane self assembly,
+we stripped out the phosphorous atoms of which there are 128 in our case. Then we strip them into files containing just
+x coordinates, just y coordinates and just z coordinates. Then we process these into frame intervals, then we get counts
+with respect to the coordinate. We then put all the frame interval counts together and from here we have a 2d histogram
+of coordinate vs time with atom count in the time-coordinate bin as the intensity on the colormap.
 This needs to run on python 3. python 2 will give you issues on linux.
 """
-
 import os
 import shutil
 import glob
@@ -19,14 +19,17 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
-'''
-The purpose of this function is to the sort the coordinates from an MDCRD output file.
-This attempt builds on the successes of CoordinateFrameGenerator Module, which was a minor failur.
-I also am going to adopt the data conventions that Lovenia is using for consistency.
-'''
-
-
 def coordinate_sorting(filename, xout, yout, zout):
+    '''
+    The purpose of this function is to the sort the coordinates from an MDCRD output file.
+    If any function needs to be refactored I would say its this one. Though I hesitate to make tweaks for
+    performance because as it stands, this isnt that robust and things may easily go wrong.
+    :param filename: name of mdcrd file to pull coordinates from.
+    :param xout: name of x output file
+    :param yout: name of y output file
+    :param zout: name of z output file
+    :return: null, generates output files.
+    '''
     if os.path.exists(xout) or os.path.exists(yout) or os.path.exists(zout):
         os.remove(xout)
         os.remove(yout)
@@ -132,6 +135,12 @@ def coordinate_sorting(filename, xout, yout, zout):
 
 
 def coordinate_file_checker(coord):
+    """
+    The purpose of this function is for debugging, it checks to make sure the data obtained from the mdcrd is reasonable
+    namely that at no point does it contain a line thats a double entry. Helper for CFC_run()
+    :param coord: coordinate file to check
+    :return: null,
+    """
     coordinates = open(coord, "r")
     # read through the lines and check for ones that have too many numbers.
     list_of_coordinates = coordinates.readlines()
@@ -144,6 +153,11 @@ def coordinate_file_checker(coord):
 
 
 def cfc_run():
+    """
+    This function runs the coordinate_file_checker based on assumptions that the x file is xcoords,
+    and so on for y and z.
+    :return: null, prints results.
+    """
     print("Bad Lines for X coordinates")
     coordinate_file_checker("xcoords")
     print("Bad Lines for Y coordinates")
@@ -152,17 +166,13 @@ def cfc_run():
     coordinate_file_checker("zcoords")
 
 
-'''
-The purpose of the next three functions is to process the results of coordinate_sorting into CSV files of binned frames 
-(time) this takes a bit longer to run on our data sets. 5 seconds.
-I believe this is working correctly. Although limited debugging has been done dec 17 2019.
-'''
-
-
-# Helper function for run_generator
-
-
 def directory_cleaner(directory_to_clean):
+    """
+    Remakes a directory after deleting it. Maybe a better way to do this.
+    I think we may not need the second case. The logic here doesnt make a ton of sense.
+    :param directory_to_clean: directory to rebuild
+    :return:
+    """
     if os.path.exists(directory_to_clean):
         shutil.rmtree(directory_to_clean)
     if not os.path.exists(directory_to_clean):
@@ -173,6 +183,13 @@ def directory_cleaner(directory_to_clean):
 
 
 def csv_gen(file, frame_binsize, dir_string):
+    """
+    This function take in a file, and makes CSV files according to the frame interval size
+    :param file: file containing a single coordinate, x,y or z delimited by a blank line for frames.
+    :param frame_binsize: the same as frame interval size
+    :param dir_string: the directory to make the csv files in
+    :return: null, generates files.
+    """
     current_frame_bin = 0
     frame_count = 0
     list_to_csv = []
@@ -202,6 +219,17 @@ def csv_gen(file, frame_binsize, dir_string):
 
 
 def run_generator(filex, dir_stringx, filey, dir_stringy, filez, dir_stringz, frame_binsize):
+    """
+    This function runs the csv generator
+    :param filex: x coordinate file
+    :param dir_stringx: file for x coordinate csvs to go into
+    :param filey: y coordinate file
+    :param dir_stringy: file for y coordinate csvs to go into
+    :param filez: z coordinate file
+    :param dir_stringz: file for z coordinate csvs to go into
+    :param frame_binsize: should be set to frame_interval_size
+    :return: null, ,generates files
+    """
     directory_cleaner(dir_stringx)
     directory_cleaner(dir_stringy)
     directory_cleaner(dir_stringz)
@@ -210,10 +238,13 @@ def run_generator(filex, dir_stringx, filey, dir_stringy, filez, dir_stringz, fr
     csv_gen(filez, frame_binsize, dir_stringz)
 
 
-# This function will go through a CSV file prepared by the CSV generator and process it into a histogram
-
-
 def csv_to_hist(csv_file, num_bins):
+    """
+    This function will go through a csv file prepared by the csv generator and make a graphical histogram from it.
+    :param csv_file:
+    :param num_bins:
+    :return:
+    """
     data_frame = pd.read_csv(csv_file)
     data_frame.hist(bins=num_bins)
     plt.title(csv_file[:-4])
@@ -225,8 +256,13 @@ def csv_to_hist(csv_file, num_bins):
     plt.close()
 
 
-# This function takes in two CSV files and produces a 2d Hexbinned histogram
 def heat_mapper(axiscsv1, axiscsv2):
+    """
+    This function takes in two csv files and makes a 2d hexbinned histogram
+    :param axiscsv1: csv for x axis
+    :param axiscsv2: csv for y axis
+    :return: null, saves 2d histogram
+    """
     title = axiscsv1[0] + " vs. " + axiscsv2[0] + " for " + axiscsv1[8:18]
     df1 = pd.read_csv(axiscsv1)
     df2 = pd.read_csv(axiscsv2)
@@ -237,14 +273,13 @@ def heat_mapper(axiscsv1, axiscsv2):
     plt.close()
 
 
-'''
-These four methods are intended to assist in processing the data for each of the axes. 
-'''
-
-
-# Creates a directory to store the value count csv files in.
-# Handles case, where files exist, this prevents double writing
 def create_vc_directory(maindirectorystring, valuecountstring):
+    """
+    This function creates a directory to store the value count csv files in.
+    :param maindirectorystring: Normally the current working directory
+    :param valuecountstring: the string to name our new value count directory
+    :return: null
+    """
     os.chdir(maindirectorystring)
     if os.path.exists(valuecountstring):
         shutil.rmtree(valuecountstring)
@@ -254,8 +289,14 @@ def create_vc_directory(maindirectorystring, valuecountstring):
     os.chdir(maindirectorystring)
 
 
-# Defines bin edges to be fed into create_binned_csv_counts
 def create_bin_edges(low, high, width):
+    """
+    This function creates binned edges to be fed into create_binned_csv_counts
+    :param low: the lowest bin value
+    :param high: the highest bin value
+    :param width: the distance between each bin value, int needed for time bins
+    :return: An array containing the edges of data bins to be used for making histograms and labels.
+    """
     bin_edges = []
     i = low
     while i <= high:
@@ -265,9 +306,17 @@ def create_bin_edges(low, high, width):
 
 
 def create_binned_csv_counts(maindirectorystring, bin_edges, valuecountstring):
+    """
+    This function takes in a directory of CSV files, and returns binned counts or tabular histograms based
+    bin edges.
+    :param maindirectorystring: directory of CSV files
+    :param bin_edges: array containing binned edges
+    :param valuecountstring: directory to put new csv files in
+    :return: null
+    """
     for filename in os.listdir(maindirectorystring):
         binnumber = filename.split("_")[2]
-        vcfilestring = str(filename[0:17]) + binnumber + "_value_counts.csv"
+        vcfilestring = str(filename[0:17]) + str(binnumber) + "_value_counts.csv"
         os.chdir(maindirectorystring)
         os.chmod(filename, 0o7777)
         df = pd.read_csv(filename)
@@ -280,6 +329,12 @@ def create_binned_csv_counts(maindirectorystring, bin_edges, valuecountstring):
 
 
 def change_permission(path, mode):
+    """
+    This function recursively changes the permissions of all files in a supplied path to the mode.
+    :param path: directory to change permission of.
+    :param mode: permission mode to change to.
+    :return: null, changes files.
+    """
     for root, dirs, files in os.walk(path, topdown=False):
         for directory in [os.path.join(root, d) for d in dirs]:
             os.chmod(directory, mode)
@@ -287,17 +342,21 @@ def change_permission(path, mode):
         os.chmod(file, mode)
 
 
-# Combines CSV files of the same index into a main CSV file.
 def combine_to_master(coordmastername, csvdir, frameintsize):
+    """
+    This function combines CSV files of the same index into a main CSV file
+    :param coordmastername: name of the master csv to be saved, needs to line up with the names generated by
+            create_binned_csv_counts
+    :param csvdir: The directory containing our binned counts as csv files.
+    :param frameintsize: standard frame_interval_size used in other functions,
+    :return: null, generates files
+    """
     os.chdir(csvdir)
     ext = "csv"
-
     all_filenames = []
     for i in glob.glob('*.{}'.format(ext)):
         all_filenames.append(i)
-
     sorted_filenames = sorted(all_filenames, key=lambda a: int(a.split("_")[2]))
-
     combined_csv = pd.read_csv(sorted_filenames[0])
     for csv_to_merge in sorted_filenames:
         combined_csv = pd.merge(combined_csv, pd.read_csv(csv_to_merge))
@@ -305,24 +364,31 @@ def combine_to_master(coordmastername, csvdir, frameintsize):
 
 
 def master_heatmap(master_csv_file, xlabels, ylabels):
+    """
+    This function takes in a csv file, and generates a heatmap from it
+    :param master_csv_file: csv file to use as dataframe
+    :param xlabels: label for horizontal axis
+    :param ylabels: label for vertical axis
+    :return: null, generates a file
+    """
     data_frame = pd.read_csv(master_csv_file)
     index_df = data_frame.set_index("Coordinate Bins")
-
     sns.set_style("ticks")
     sns.set(font_scale=7.5)
-
     fig, ax = plt.subplots(figsize=(90, 125))
-
     sns.heatmap(index_df, xticklabels=xlabels, yticklabels=ylabels)
-
     plt.xlabel("Time Bins")
     plt.ylabel("Coordinate Bins")
-
     fig.savefig(master_csv_file[:-4] + '.png')
     plt.close(fig)
 
 
 def frame_counter(mdcrd):
+    """
+    This function counts the number of frames in a cpptraj generated MDCRD file
+    :param mdcrd: output file from cpptraj script containing a single type of atom for 'count' frames
+    :return: number of frames, count.
+    """
     count = 0
     with open(mdcrd, "r") as f:
         for line in f:
@@ -370,7 +436,6 @@ def main():
     create_vc_directory(os.getcwd(), zvcdir)
     create_binned_csv_counts(dir_stringz, data_bin_edges, "value_counts_z_frameintervalsize_"
                              + str(frame_interval_size))
-
     os.chdir(cwd)
     combine_to_master("xmaster", xvcdir, str(frame_interval_size))
     os.chdir(cwd)
@@ -378,20 +443,15 @@ def main():
     os.chdir(cwd)
     combine_to_master("zmaster", zvcdir, str(frame_interval_size))
     os.chdir(cwd)
-
     os.chdir(xvcdir)
     master_heatmap("xmaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
     os.chdir("../")
-
     os.chdir(yvcdir)
     master_heatmap("ymaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
     os.chdir("../")
-
     os.chdir(zvcdir)
     master_heatmap("zmaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
     os.chdir("../")
-
-
 
 
 main()
