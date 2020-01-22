@@ -3,14 +3,16 @@ import datetime
 import glob
 import shutil as shu
 
-def make_directory(dir)
+
+def make_directory(dir):
     """Makes a directory if it doesnt already exist"""
     if not os.path.exists(dir):
         os.mkdir(dir)
 
+
 hist_dir = "histogram_data"
 
-#Now make a list of all the run directories.
+# Now make a list of all the run directories.
 ext = "run"
 all_runs = [i for i in glob.glob("*.{}".format(ext))]
 
