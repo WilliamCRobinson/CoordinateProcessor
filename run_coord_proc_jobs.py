@@ -33,6 +33,7 @@ for run in all_runs:
         file.writelines("#SBATCH --mail-type=ALL\n")
         file.writelines("#SBATCH --mail-user=wcr9@nau.edu\n")
         file.writelines("module load python/3.latest\n")
+        file.writelines("module load amber\n")
         file.writelines("cpptraj -i /home/wcr9/scripts/cpptraj.in -p ../common/cho_ger.parm7\n")
         file.writelines("python /home/wcr9/scripts/coordinate_processor.py\n")
     os.system("sbatch " + run + "coordprocrun.sh")
