@@ -15,14 +15,14 @@ hist_dir = "histogram_data"
 # Now make a list of all the run directories.
 ext = "run"
 all_runs = [i for i in glob.glob("*.{}".format(ext))]
-
+# Loop through the run directories
 for run in all_runs:
     time = datetime.now()
     os.chdir(run)
     make_directory(hist_dir)
     shu.copy("mdcrd", hist_dir)
     os.chdir(hist_dir)
-    with open(run+"coordprocrun.sh", "wh") as file:
+    with open(run+"coordprocrun.sh", "w") as file:
         file.writelines("#!/bin/bash\n")
         file.writelines("#SBATCH --job-name=" + time + "_run_coord_proc\n")
         file.writelines("#SBATCH --output=.out/" + time + "_run_coord_proc\n")
