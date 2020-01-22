@@ -17,7 +17,7 @@ ext = "run"
 all_runs = [i for i in glob.glob("*.{}".format(ext))]
 # Loop through the run directories
 for run in all_runs:
-    time = datetime.now()
+    time = str(datetime.datetime.now())
     os.chdir(run)
     make_directory(hist_dir)
     shu.copy("mdcrd", hist_dir)
@@ -33,9 +33,10 @@ for run in all_runs:
         file.writelines("#SBATCH --mail-type=ALL\n")
         file.writelines("#SBATCH --mail-user=wcr9@nau.edu\n")
         file.writelines("module load python/3.latest\n")
-        file.writelines("cpptraj -i /home/wcr9/scripts/cpptraj.in -p ../common/cho_ger.parm7")
+        file.writelines("cpptraj -i /home/wcr9/scripts/cpptraj.in -p ../common/cho_ger.parm7\n")
         file.writelines("python /home/wcr9/scripts/coordinate_processor.py")
     os.system("sbatch " + run + "coordprocrun.sh")
+    os.chdir("../../")
 
 
 
