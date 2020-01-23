@@ -35,7 +35,9 @@ for run in all_runs:
         file.writelines("module load python/3.latest\n")
         file.writelines("module load amber\n")
         file.writelines("cpptraj -i /home/wcr9/scripts/cpptraj.in -p ../../common/cho_ger.parm7\n")
-        file.writelines(".conda/envs/seaborn_env/python /home/wcr9/scripts/coordinate_processor.py\n")
+        file.writelines("module load anaconda\n")
+        file.writelines("source activate seaborn_env\n")
+        file.writelines("python /home/wcr9/scripts/coordinate_processor.py\n")
     os.system("sbatch " + run + "coordprocrun.sh")
     os.chdir("../../")
 
