@@ -26,7 +26,7 @@ for run in all_runs:
         file.writelines("#SBATCH --job-name=" + time + "_run_coord_proc\n")
         file.writelines("#SBATCH --output=" + time + "_run_coord_proc_out.out\n")
         file.writelines("#SBATCH --error=" + time + "_run_coord_proc_error.out\n")
-        file.writelines("#SBATCH --time=00:30:00\n")
+        file.writelines("#SBATCH --time=00:10:00\n")
         file.writelines("#SBATCH --ntasks 1\n")
         file.writelines("#SBATCH --cpus-per-task 1\n")
         file.writelines("#SBATCH --mem=2000\n")

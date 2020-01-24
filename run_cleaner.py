@@ -1,5 +1,5 @@
 """
-This script runs from a POPx directory and runs through and deletes the histogram data directories.
+This script runs from a x-ILs directory and runs through and deletes the histogram data directories.
 This is to ensure that we have a clean run each time time we test. plus theres so many output files. So many.
 """
 

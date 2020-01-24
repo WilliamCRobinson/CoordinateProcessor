@@ -365,7 +365,7 @@ def combine_to_master(coordmastername, csvdir, frameintsize, masterdirectory):
     combined_csv.to_csv(coordmastername + "_" + frameintsize + "_" + ".csv", index=False, encoding="utf-8")
 
 
-def master_heatmap(master_csv_file, xlabels, ylabels):
+def master_heatmap(master_csv_file, xlabels, ylabels, axis):
     """
     This function takes in a csv file, and generates a heatmap from it
     :param master_csv_file: csv file to use as dataframe
@@ -381,7 +381,9 @@ def master_heatmap(master_csv_file, xlabels, ylabels):
     sns.heatmap(index_df, xticklabels=xlabels, yticklabels=ylabels)
     plt.xlabel("Time Bins")
     plt.ylabel("Coordinate Bins")
-    fig.savefig(master_csv_file[:-4] + '.png')
+    figure_name = os.getcwd().replace("\\", "_").replace(":", "_")
+    plt.title(axis + "_" + figure_name)
+    fig.savefig(axis + "_" + figure_name + '.png')
     plt.close(fig)
 
 
@@ -450,9 +452,9 @@ def main():
     os.chdir(cwd)
     # Make heatmaps
     os.chdir(mastdir)
-    master_heatmap("xmaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
-    master_heatmap("ymaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
-    master_heatmap("zmaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges)
+    master_heatmap("xmaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges, "x")
+    master_heatmap("ymaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges, "y")
+    master_heatmap("zmaster_" + str(frame_interval_size) + "_.csv", time_bin_edges, data_bin_edges, "z")
     # clean up old directories
     os.chdir("../")
     shutil.rmtree(xvcdir)
