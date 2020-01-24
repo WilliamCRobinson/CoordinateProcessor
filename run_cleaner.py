@@ -12,6 +12,8 @@ hist_dir = "histogram_data"
 ext = "run"
 all_runs = [i for i in glob.glob("*.{}".format(ext))]
 for run in all_runs:
+
     os.chdir(run)
-    shutil.rmtree(hist_dir)
+    if os.path.exists(hist_dir):
+        shutil.rmtree(hist_dir)
     os.chdir("../")
