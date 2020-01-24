@@ -4,7 +4,6 @@ import glob
 import shutil as shu
 
 
-
 def make_directory(dir):
     """Makes a directory if it doesnt already exist"""
     if not os.path.exists(dir):
@@ -16,8 +15,6 @@ hist_dir = "histogram_data"
 # Now make a list of all the run directories.
 ext = "run"
 all_runs = [i for i in glob.glob("*.{}".format(ext))]
-# This script will either clean directories or make directories
-
 for run in all_runs:
     time = str(datetime.datetime.now()).split(".")[-1]
     os.chdir(run)
@@ -43,5 +40,3 @@ for run in all_runs:
                         " /home/wcr9/scripts/coordinate_processor.py\n")
     os.system("sbatch " + run + "coordprocrun.sh")
     os.chdir("../../")
-
-
