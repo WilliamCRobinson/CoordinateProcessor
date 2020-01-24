@@ -381,7 +381,7 @@ def master_heatmap(master_csv_file, xlabels, ylabels, axis):
     sns.heatmap(index_df, xticklabels=xlabels, yticklabels=ylabels)
     plt.xlabel("Time Bins")
     plt.ylabel("Coordinate Bins")
-    figure_name = os.getcwd().replace("\\", "_").replace(":", "_")
+    figure_name = os.getcwd().replace("\\", "_").replace(":", "_").replace("/", "_")
     plt.title(axis + "_" + figure_name)
     fig.savefig(axis + "_" + figure_name + '.png')
     plt.close(fig)
