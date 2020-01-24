@@ -2,7 +2,7 @@ import os
 import datetime
 import glob
 import shutil as shu
-import sys
+
 
 
 def make_directory(dir):
@@ -17,36 +17,31 @@ hist_dir = "histogram_data"
 ext = "run"
 all_runs = [i for i in glob.glob("*.{}".format(ext))]
 # This script will either clean directories or make directories
-if sys.argv[1] == "clean":
-    for run in all_runs:
-        os.chdir(run)
-        shutil.rmtree(hist_dir)
-        os.chdir("../")
-else:
-    for run in all_runs:
-        time = str(datetime.datetime.now()).split(".")[-1]
-        os.chdir(run)
-        make_directory(hist_dir)
-        shu.copy("mdcrd", hist_dir)
-        os.chdir(hist_dir)
-        with open(run + "coordprocrun.sh", "w") as file:
-            file.writelines("#!/bin/bash\n")
-            file.writelines("#SBATCH --job-name=" + time + "_run_coord_proc\n")
-            file.writelines("#SBATCH --output=" + time + "_run_coord_proc_out.out\n")
-            file.writelines("#SBATCH --error=" + time + "_run_coord_proc_error.out\n")
-            file.writelines("#SBATCH --time=00:30:00\n")
-            file.writelines("#SBATCH --ntasks 1\n")
-            file.writelines("#SBATCH --cpus-per-task 1\n")
-            file.writelines("#SBATCH --mem=2000\n")
-            file.writelines("#SBATCH --mail-type=ALL\n")
-            file.writelines("#SBATCH --mail-user=wcr9@nau.edu\n")
-            file.writelines("module load amber\n")
-            file.writelines("cpptraj -i /home/wcr9/scripts/cpptraj.in -p ../../common/cho_ger.parm7\n")
-            file.writelines("module load anaconda/latest\n")
-            file.writelines("source activate seaborn_env\n")
-            file.writelines("srun /home/wcr9/.conda/envs/seaborn_env/bin/python" +
-                            " /home/wcr9/scripts/coordinate_processor.py\n")
-        os.system("sbatch " + run + "coordprocrun.sh")
-        os.chdir("../../")
+
+for run in all_runs:
+    time = str(datetime.datetime.now()).split(".")[-1]
+    os.chdir(run)
+    make_directory(hist_dir)
+    shu.copy("mdcrd", hist_dir)
+    os.chdir(hist_dir)
+    with open(run + "coordprocrun.sh", "w") as file:
+        file.writelines("#!/bin/bash\n")
+        file.writelines("#SBATCH --job-name=" + time + "_run_coord_proc\n")
+        file.writelines("#SBATCH --output=" + time + "_run_coord_proc_out.out\n")
+        file.writelines("#SBATCH --error=" + time + "_run_coord_proc_error.out\n")
+        file.writelines("#SBATCH --time=00:30:00\n")
+        file.writelines("#SBATCH --ntasks 1\n")
+        file.writelines("#SBATCH --cpus-per-task 1\n")
+        file.writelines("#SBATCH --mem=2000\n")
+        file.writelines("#SBATCH --mail-type=ALL\n")
+        file.writelines("#SBATCH --mail-user=wcr9@nau.edu\n")
+        file.writelines("module load amber\n")
+        file.writelines("cpptraj -i /home/wcr9/scripts/cpptraj.in -p ../../common/cho_ger.parm7\n")
+        file.writelines("module load anaconda/latest\n")
+        file.writelines("source activate seaborn_env\n")
+        file.writelines("srun /home/wcr9/.conda/envs/seaborn_env/bin/python" +
+                        " /home/wcr9/scripts/coordinate_processor.py\n")
+    os.system("sbatch " + run + "coordprocrun.sh")
+    os.chdir("../../")
 
 
