@@ -17,5 +17,5 @@ for run in all_runs:
         os.system("nohup srun cpptraj -i /home/wcr9/scripts/cpptraj_stripper.in -p ../common/cho_ger.parm7 &")
     else:
         os.system("nohup srun cpptraj -i /home/wcr9/scripts/cpptraj_stripper.in -p ../../common/cho_ger.parm7 &")
-
+    os.chdir("../")
 
