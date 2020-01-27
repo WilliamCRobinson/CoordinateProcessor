@@ -403,11 +403,11 @@ def frame_counter(mdcrd):
 
 
 def main():
-    mdcrdfilename = "modified_out.crd"
+    mdcrdfilename = "combined_runs_modified_out.crd"
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"
-    frame_interval_size = 50
+    frame_interval_size = 10000
     mastdir = "master_frameintervalsize_" + str(frame_interval_size)
     # These are standard
     dir_stringx = "CSV" + "_" + xfile + "_" + "_frameintervalsize_" + str(frame_interval_size)
