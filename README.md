@@ -67,4 +67,9 @@ Notes on Parsing the Strucure
 			z in 3
 	then the frame ends. 
 As of December 2019, we have thus far been able to bin the data over intervals of frames in the simulations. Now it remains to generate 2D histograms from this data so that we can see the evolution of each axes histogram over time in the simulation, allowing us to determine when the cell membrane has formed. 
-Janurary 2019, I have been able to make three 2dimensional histograms from the mdcrd in each axis of Coord Vs Time Vs Count, with count as intensity. 
+
+Janurary 2020, I have been able to make three 2dimensional histograms from the mdcrd in each axis of Coord Vs Time Vs Count, with count as intensity. 
+
+Feb 2020. 
+
+Ive ironed out issues with the script and made a batch file that can run through the process of calling cpptraj and python automatically. Other users will need to adjust it to their account and filestructure but it should be a fire and forget button once everything is locked in. 
