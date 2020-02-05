@@ -4,13 +4,15 @@ It simply goes through the run directories in a simulation directory and creates
 that will combine the trajectories for further processing. 
  """
 import glob
+import os
 ext = "run"
 all_runs = [i for i in glob.glob("*.{}".format(ext))]
 all_runs = sorted(all_runs, key=lambda a: int(a.split(".")[0]))
 with open("cpptraj_run_combiner.in","w") as f:
 
     for run in all_runs:
-        f.writelines("trajin " + run + "/mdcrd\n")
+        if os.path.exists(run + "/mdcrd\n"):
+            f.writelines("trajin " + run + "/mdcrd\n")
     f.writelines("trajout combined_runs_modified_out\n")
 
 
