@@ -1,0 +1,5 @@
+trajin e1_e2_main_mdcrd
+strip !@P31 outprefix strip nobox
+trajout combined_mdcrd_stripped
+go
+quit

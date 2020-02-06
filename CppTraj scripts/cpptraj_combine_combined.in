@@ -1,0 +1,4 @@
+trajin equil1/combined_runs_modified_out
+trajin equil2/combined_runs_modified_out
+trajin combined_runs_modified_out
+trajout e1_e2_main_mdcrd
