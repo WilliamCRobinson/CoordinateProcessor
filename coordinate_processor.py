@@ -403,7 +403,7 @@ def frame_counter(mdcrd):
 
 
 def main():
-    mdcrdfilename = "combined_runs_modified_out.crd"
+    mdcrdfilename = "combined_mdcrd_stripped"
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"

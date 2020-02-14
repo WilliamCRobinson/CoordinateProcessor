@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=T2H
 #SBATCH --time=08:00:00
-#SBATCH --mem=120000
+#SBATCH --mem=5000
 #SBATCH --output=outT2H
 #SBATCH --error=errorT2H
 #SBATCH --mail-type=ALL
