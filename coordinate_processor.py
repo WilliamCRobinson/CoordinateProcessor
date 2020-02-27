@@ -407,7 +407,7 @@ def main():
     xfile = "xcoords"
     yfile = "ycoords"
     zfile = "zcoords"
-    frame_interval_size = 10000
+    frame_interval_size = 50
     mastdir = "master_frameintervalsize_" + str(frame_interval_size)
     # These are standard
     dir_stringx = "CSV" + "_" + xfile + "_" + "_frameintervalsize_" + str(frame_interval_size)

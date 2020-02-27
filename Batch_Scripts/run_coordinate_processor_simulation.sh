@@ -12,7 +12,7 @@ python /home/wcr9/scripts/create_cpptraj_combiner.py
 cpptraj -i cpptraj_run_combiner.in -p /common/cho_ger.parm7
 cd ./equil1/
 python /home/wcr9/scripts/create_cpptraj_combiner.py
-cpptraj -i cpptraj_run_combiner.in -p ../common/cho_ger.parm7
+cpptraj -i cpptraj_run_combiner.in -p ../common/cho_ger.parm7 &&
 cd ../equil2/
 python /home/wcr9/scripts/create_cpptraj_combiner.py
 cpptraj -i cpptraj_run_combiner.in -p ../common/cho_ger.parm7
